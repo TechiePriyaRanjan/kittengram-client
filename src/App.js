@@ -1,26 +1,56 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Query } from "react-apollo";
+import {gql} from "apollo-boost";
 import './App.css';
+import {
+  Container,
+  Header,
+  Card,
+  Image,
+  Footer,
+  Comment,
+  Author
+} from "./Components";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+  return(
+    <Container>
+    <Query
+      query = {gql `
+        {
+          photos {
+            url
+            author
+            comments {
+              author
+              text
+            }
+          }
+        }      
+      `}
+    >
+    {({ loading, error, data }) => {
+          if (loading) return <p>Loading...</p>;
+          if (error) return <p>Error :(</p>;
+
+          return data.photos.map(photo => (
+            <Card key={photo.url}>
+              <Header>{photo.author}</Header>
+              <Image src={photo.url} alt={photo.author} />
+              <Footer>
+                {photo.comments.map(comment => (
+                  <Comment key={comment.text}>
+                    <Author>{comment.author}</Author>
+                    {comment.text}
+                  </Comment>
+                ))}
+              </Footer>
+            </Card>
+          ));
+        }}
+      </Query>
+  </Container>
+  )
 }
 
 export default App;
